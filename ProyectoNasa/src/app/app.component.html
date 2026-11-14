@@ -1,155 +1,151 @@
-<div class="app-shell">
-  <div class="stars2"></div>
+<div class="app-shell" [class.hit]="hit" [attr.data-phase]="phase">
+  <div class="space" aria-hidden="true">
+    <div class="stars s1"></div><div class="stars s2"></div><div class="stars s3"></div>
+    <i class="shoot a"></i><i class="shoot b"></i><i class="shoot c"></i>
+    <div class="planet-bg"><span class="band b1"></span><span class="band b2"></span><span class="spark p1">✦</span><span class="spark p2">✦</span><span class="spark p3">✦</span></div>
+  </div>
+
   <header class="topbar" *ngIf="phase !== 'intro'">
-    <div class="brand">🚀 MISIÓN ZAFIRO <span class="sub">Planeta HAT-P-7b</span></div>
-    <div class="day">Día {{day}} / {{daysTotal}}</div>
+    <div class="brand">🚀 Sapphire Mission</div>
+    <div class="trail">
+      <span class="node" *ngFor="let d of days" [class.done]="d < day" [class.now]="d === day">{{d % 2 === 0 ? '🎮' : '⭐'}}</span>
+    </div>
+    <div class="daychip">Day {{day}} of {{daysTotal}}</div>
   </header>
 
-  <section class="screen intro" *ngIf="phase === 'intro'">
-    <div class="hero glow">
-      <div class="planet"></div>
-      <h1>MISIÓN ZAFIRO</h1>
-      <p class="tag">Una aventura espacial para salvar las gemas del espacio</p>
-      <div class="story">
-        <p>¡Hola, astronauta! Unos <b>ladrones espaciales</b> viajan al planeta <b>HAT-P-7b</b>, muy lejos en la constelación del Cisne. Allí las nubes tienen <b>corindón</b>, ¡el mineral de los zafiros y rubíes!</p>
-        <p>Tienes <b>7 días</b> para una misión secreta: hacer que la nave no pueda robar las gemas bajando sus 3 recursos por debajo de <b>25%</b>:</p>
-      </div>
-      <div class="legend">
-        <div><span class="dot e"></span>⚡ Energía (la electricidad de la nave)</div>
-        <div><span class="dot s"></span>🫁 Soporte vital (aire, agua y plantitas)</div>
-        <div><span class="dot b"></span>🛡️ Escudo (protección contra rayos espaciales)</div>
-      </div>
-      <button class="cta" (click)="startGame()">¡EMPEZAR AVENTURA!</button>
-      <p class="note">Aprende con datos reales de la NASA: ECLSS (aire y agua), clima espacial y el planeta HAT-P-7b.</p>
+  <main class="stage">
+    <aside class="nova">
+    <section class="hud" *ngIf="phase !== 'intro' && phase !== 'ending'">
+    <div class="res" *ngFor="let r of resList" [ngClass]="barState(resources[r.k])">
+      <div class="top"><span class="ic">{{r.icon}}</span><label>{{r.label}}</label><b>{{resources[r.k]}}%</b></div>
+      <div class="bar"><div class="fill" [style.width.%]="resources[r.k]"></div><i class="goal"></i></div>
+      <span class="pop" *ngIf="deltas[r.k]">{{sign(deltas[r.k])}}</span>
     </div>
+    <div class="res trust"><div class="top"><span class="ic">🤝</span><label>Crew trust</label><b>{{trust}}%</b></div><div class="bar"><div class="fill" [style.width.%]="trust"></div></div></div>
   </section>
 
-  <section class="hud" *ngIf="phase!=='intro' && phase!=='ending'">
-    <div class="res"><label>⚡ Energía</label><div class="bar"><div class="fill" [style.width.%]="resources.energia" [style.background]="barColor(resources.energia)"></div></div><span>{{resources.energia}}%</span></div>
-    <div class="res"><label>🫁 Soporte vital</label><div class="bar"><div class="fill" [style.width.%]="resources.soporte" [style.background]="barColor(resources.soporte)"></div></div><span>{{resources.soporte}}%</span></div>
-    <div class="res"><label>🛡️ Escudo</label><div class="bar"><div class="fill" [style.width.%]="resources.blindaje" [style.background]="barColor(resources.blindaje)"></div></div><span>{{resources.blindaje}}%</span></div>
-    <div class="res"><label>🤝 Confianza</label><div class="bar"><div class="fill trustf" [style.width.%]="trust"></div></div><span>{{trust}}%</span></div>
-  </section>
-
-  <section class="screen" *ngIf="phase === 'morning'">
-    <div class="panel glow">
-      <h2>☀️ Buenos días · NOVA te informa</h2>
-      <p class="ai-msg">{{morningTip}}</p>
-      <div class="crew-grid">
-        <div class="crew-card" *ngFor="let c of crew"><strong>{{c.name}}</strong><p>{{c.msg}}</p></div>
+      <div class="bubble" [class.typing]="speaking" (click)="skipTyping()">
+        <span class="who">🤖 Cygnus</span>
+        <p>{{typed}}<i class="caret" *ngIf="speaking"></i></p>
       </div>
-      <p class="objective">Meta: deja <b>Energía, Soporte y Escudo</b> en menos de 25% antes del día 7. Hoy toca: {{isDecisionDay ? '3 decisiones' : 'un minijuego interactivo'}}.</p>
-      <button class="cta" (click)="proceedFromMorning()">¡Vamos!</button>
-    </div>
-  </section>
-
-  <section class="screen" *ngIf="phase === 'decision' && currentDecision">
-    <div class="panel glow">
-      <div class="step">Decisión {{decisionIndex + 1}} de {{currentDecisions.length}}</div>
-      <h2>{{currentDecision.title}}</h2>
-      <p class="bigtext">{{currentDecision.situation}}</p>
-      <div class="nasa-fact">🛰️ {{currentDecision.nasa}}</div>
-      <div class="choices">
-        <button class="choice" *ngFor="let c of currentDecision.choices" (click)="choose(c)" [disabled]="choiceDone" [class.picked]="selectedChoice===c">{{c.text}}</button>
+      <div class="cust" *ngIf="showCust"><div class="row"><button *ngFor="let k of novaColors" class="sw" [style.background]="k.a" [class.on]="novaColor === k" (click)="novaColor = k"></button></div><div class="row"><button *ngFor="let a of accs" class="ac" [class.on]="acc === a" (click)="acc = a">{{a || '✖'}}</button></div></div>
+      <div class="robot" [ngClass]="'m-' + mood" [class.talk]="speaking" [style.--nova]="novaColor.a">
+        <span class="acc" *ngIf="acc" [class.g]="acc === '🕶️'" [class.b]="acc === '🎀'">{{acc}}</span>
+        <div class="antenna"><i></i></div>
+        <div class="head"><span class="ear l"></span><span class="ear r"></span><div class="visor"><span class="eye"></span><span class="eye"></span><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></div></div>
+        <div class="body"><span class="core"></span></div>
+        <span class="arm l"></span><span class="arm r"></span><span class="foot l"></span><span class="foot r"></span>
       </div>
-      <div class="result" *ngIf="selectedChoice">
-        <h3>¿Qué pasó?</h3>
-        <p>{{selectedChoice.result}}</p>
-        <p class="learn"><b>Aprendiste:</b> {{selectedChoice.fact}}</p>
-        <div class="deltas">
-          <span *ngIf="selectedChoice.effects.energia">⚡ {{selectedChoice.effects.energia! > 0 ? '+' : ''}}{{selectedChoice.effects.energia}}</span>
-          <span *ngIf="selectedChoice.effects.soporte">🫁 {{selectedChoice.effects.soporte! > 0 ? '+' : ''}}{{selectedChoice.effects.soporte}}</span>
-          <span *ngIf="selectedChoice.effects.blindaje">🛡️ {{selectedChoice.effects.blindaje! > 0 ? '+' : ''}}{{selectedChoice.effects.blindaje}}</span>
-          <span *ngIf="!selectedChoice.effects.energia && !selectedChoice.effects.soporte && !selectedChoice.effects.blindaje">Sin cambios en las barras</span>
+      <button class="cust-btn" (click)="showCust = !showCust">🎨 Customize Cygnus</button>
+    </aside>
+
+    <div class="content">
+      <section class="screen intro" *ngIf="phase === 'intro'">
+        <h1 class="title">Sapphire Mission</h1>
+        <p class="tag">Save the gems of planet HAT-P-7b</p>
+        <div class="cards3">
+          <div class="mini e"><span>⚡</span><b>Energy</b><small>the ship electricity</small></div>
+          <div class="mini s"><span>🫁</span><b>Life support</b><small>air, water and plants</small></div>
+          <div class="mini b"><span>🛡️</span><b>Shield</b><small>against space rays</small></div>
         </div>
-        <button class="cta" (click)="nextDecision()">{{decisionIndex < currentDecisions.length - 1 ? 'Siguiente' : 'Ir al informe'}}</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="screen" *ngIf="phase === 'minigame' && currentMinigame">
-    <div class="panel glow">
-      <h2>🎮 {{currentMinigame.title}}</h2>
-      <p class="bigtext">{{currentMinigame.intro}}</p>
-      <div class="nasa-fact">🛰️ {{currentMinigame.nasa}}</div>
-
-      <div *ngIf="day===2" class="mg">
-        <div class="memory-status">
-          <span *ngIf="mg.showing">👀 Mira la secuencia...</span>
-          <span *ngIf="mg.canPlay && !mgResult">🖐️ ¡Tu turno! Repítela ({{mg.input?.length || 0}} / {{mg.seq?.length}})</span>
+        <div class="brief">
+          <p>🌍 You are a <b>NASA astronaut</b>. Looters are secretly flying to <b>HAT-P-7b</b>, 1,000+ light-years away in Cygnus, where <b>corundum clouds</b> (the mineral of sapphires and rubies) make it rain gems. In 7 days they plan to collect the rain and sell it on Earth.</p>
+          <p>🎯 Your mission: <b>infiltrate their ship</b> and sabotage it before the storm. Drop <b>Energy, Life support and Shield below 25%</b> to force it back to Earth.</p>
+          <p>🗓️ Days 1, 3, 5, 7: <b>3 decisions</b>. Days 2, 4, 6: a <b>sabotage minigame</b>. No choice is fully right, what matters is what you learn. Every night you send NASA a letter. On day 7 you can <b>eject the ship</b>, but only if all three are under 25%.</p>
         </div>
-        <div class="memory-grid">
-          <button class="m-btn" *ngFor="let c of mg.colors" [ngClass]="c" [class.flash]="mg.showing && mg.seq[mg.showIndex]===c" (click)="mgMemoryPick(c)" [disabled]="!mg.canPlay || mgResult">{{c}}</button>
-        </div>
-        <div class="seq-dots"><span *ngFor="let s of mg.seq; let i=index" class="sdot" [class.done]="mg.input?.length > i"></span></div>
-      </div>
+        <button class="btn cta" (click)="startGame()">Start adventure!</button>
+        <p class="note">Real NASA topics: ECLSS, space weather and HAT-P-7b.</p>
+      </section>
 
-      <div *ngIf="day===4" class="mg">
-        <div class="catch-hud"><span>⏱️ Tiempo: {{mg.time}}s</span><span>⭐ Rayos atrapados: {{mg.score}}</span></div>
-        <div class="catch-area">
-          <button class="ray" *ngFor="let r of mg.rays" [style.left.%]="r.x" [style.top.%]="r.y" (click)="catchRay(r)">☄️</button>
-          <div class="catch-hint" *ngIf="!mg.rays?.length && !mg.over">¡Toca los rayos cuando aparezcan!</div>
+      <section class="screen" *ngIf="phase === 'morning'">
+        <div class="panel">
+          <h2>☀️ Good morning, astronaut</h2>
+          <div class="recap"><span *ngFor="let r of resList" [class.ok]="resources[r.k] < 25">{{r.icon}} {{r.label}} {{resources[r.k]}}%</span></div>
+          <div class="crew">
+            <div class="chat" *ngFor="let c of morningCrew; let i = index" [style.animation-delay.ms]="300 + i * 350"><span class="av">{{c.m.emoji}}</span><div><strong>{{c.m.name}}</strong><p>{{c.text}}</p></div></div>
+          </div>
+          <p class="objective">🎯 Today: <b>{{isDecisionDay ? '3 decisions' : 'a sabotage minigame'}}</b></p>
+          <button class="btn cta" (click)="proceedFromMorning()">Let us go!</button>
         </div>
-        <div *ngIf="mg.over && !mgResult" class="center"><button class="cta" (click)="endCatch()">Ver resultado</button></div>
-      </div>
+      </section>
 
-      <div *ngIf="day===6" class="mg">
-        <p>Usa los botones para mover al astronauta 🧑‍🚀 hasta la computadora 🖥️. ¡Evita los robots 🤖!</p>
-        <div class="maze">
-          <div class="maze-row" *ngFor="let row of mg.grid; let r=index">
-            <div class="cell" *ngFor="let col of [].constructor(mg.cols); let c=index" [ngClass]="mazeCell(r,c)">
-              <span *ngIf="mazeCell(r,c)==='player'">🧑‍🚀</span>
-              <span *ngIf="mazeCell(r,c)==='goal'">🖥️</span>
-              <span *ngIf="mazeCell(r,c)==='guard'">🤖</span>
-              <span *ngIf="mazeCell(r,c)==='wall'">🧱</span>
+      <section class="screen" *ngIf="phase === 'decision' && currentDecision">
+        <div class="panel decision">
+          <div class="dots"><i *ngFor="let d of currentDecisions; let i = index" [class.on]="i <= decisionIndex"></i></div>
+          <h2>{{currentDecision.title}}</h2>
+          <div class="nasa-fact">🛰️ {{currentDecision.nasa}}</div>
+          <div class="choices">
+            <button class="btn choice blue" *ngFor="let c of currentDecision.choices" (click)="choose(c)" [disabled]="choiceDone" [class.picked]="selectedChoice === c" [class.faded]="selectedChoice && selectedChoice !== c">{{c.text}}</button>
+          </div>
+          <div class="result" *ngIf="selectedChoice">
+            <div class="deltas">
+              <span *ngIf="selectedChoice.effects.energia">⚡ {{sign(selectedChoice.effects.energia)}}</span>
+              <span *ngIf="selectedChoice.effects.soporte">🫁 {{sign(selectedChoice.effects.soporte)}}</span>
+              <span *ngIf="selectedChoice.effects.blindaje">🛡️ {{sign(selectedChoice.effects.blindaje)}}</span>
+              <span *ngIf="!selectedChoice.effects.energia && !selectedChoice.effects.soporte && !selectedChoice.effects.blindaje">No change</span>
             </div>
+            <p class="learn">💡 {{selectedChoice.fact}}</p>
+            <div class="chat now" *ngIf="reaction"><span class="av">{{reaction.m.emoji}}</span><div><strong>{{reaction.m.name}}</strong><p>{{reaction.text}}</p><small class="re">↪ {{reaction.about}}</small></div></div>
+            <button class="btn cta" (click)="nextDecision()">{{decisionIndex < currentDecisions.length - 1 ? 'Next' : 'Go to report'}}</button>
           </div>
         </div>
-        <div class="controls" *ngIf="!mg.done && !mgResult">
-          <div></div><button class="pad" (click)="move(-1,0)">⬆️</button><div></div>
-          <button class="pad" (click)="move(0,-1)">⬅️</button><button class="pad" (click)="move(1,0)">⬇️</button><button class="pad" (click)="move(0,1)">➡️</button>
+      </section>
+
+      <section class="screen" *ngIf="phase === 'minigame' && currentMinigame">
+        <div class="panel">
+          <h2>🎮 {{currentMinigame.title}}</h2>
+          <div class="nasa-fact">🛰️ {{currentMinigame.nasa}}</div>
+
+          <div *ngIf="day===2" class="mg">
+            <div class="memory-status"><span *ngIf="mg.showing">👀 Watch the sequence...</span><span *ngIf="mg.canPlay && !mgResult">🖐️ Your turn! ({{mg.input?.length || 0}} / {{mg.seq?.length}})</span></div>
+            <div class="memory-grid">
+              <button class="m-btn" *ngFor="let c of mg.colors" [ngClass]="c" [class.flash]="mg.showing && mg.seq[mg.showIndex]===c" (click)="mgMemoryPick(c)" [disabled]="!mg.canPlay || mgResult">{{c}}</button>
+            </div>
+          </div>
+
+          <div *ngIf="day===4" class="mg">
+            <div class="catch-hud"><span>⏱️ {{mg.time}}s</span><span>⭐ {{mg.score}}</span></div>
+            <div class="catch-area">
+              <button class="ray" *ngFor="let r of mg.rays" [style.left.%]="r.x" [style.top.%]="r.y" (click)="catchRay(r)">☄️</button>
+              <div class="catch-hint" *ngIf="!mg.rays?.length && !mg.over">Tap the rays!</div>
+            </div>
+            <div *ngIf="mg.over && !mgResult" class="center"><button class="btn cta" (click)="endCatch()">See result</button></div>
+          </div>
+
+          <div *ngIf="day===6" class="mg">
+            <div class="tries"><span *ngFor="let t of [0,1,2]" [class.hit]="mg.marks[t] === true" [class.miss]="mg.marks[t] === false">{{mg.marks[t] === true ? '✓' : mg.marks[t] === false ? '✗' : '•'}}</span></div>
+            <div class="track"><div class="zone" [style.left.%]="mg.zone" [style.width.%]="mg.zw"></div><div class="needle" [style.left.%]="mg.pos"></div></div>
+            <button class="btn cta stop" *ngIf="!mg.over" (click)="stopLine()">STOP! (Space)</button>
+          </div>
+
+          <div class="result" *ngIf="mgResult"><div class="chat now" *ngIf="reaction"><span class="av">{{reaction.m.emoji}}</span><div><strong>{{reaction.m.name}}</strong><p>{{reaction.text}}</p><small class="re">↪ {{reaction.about}}</small></div></div><button class="btn cta" (click)="finishMinigame()">Go to report</button></div>
         </div>
-      </div>
+      </section>
 
-      <div class="result" *ngIf="mgResult">
-        <p>{{mgResult}}</p>
-        <button class="cta" (click)="finishMinigame()">Ir al informe</button>
-      </div>
-    </div>
-  </section>
+      <section class="screen" *ngIf="phase === 'report'">
+        <div class="panel">
+          <h2>✉️ Letter to NASA</h2>
+          <div class="learn-list">
+            <button class="learn-item" *ngFor="let l of learnings" (click)="toggleLearning(l)" [class.sel]="selectedLearnings.includes(l)">⭐ {{l}}</button>
+            <p *ngIf="!learnings.length">You saved no lessons today, but there will be more tomorrow!</p>
+          </div>
+          <textarea [(ngModel)]="reportText" placeholder="Write your note of the day (optional)..."></textarea>
+          <button class="btn cta" (click)="submitReport()">{{day >= 7 ? (success ? 'Eject the ship! 🚀' : 'Try to eject 🚀') : 'Send and sleep 🌙'}}</button>
+        </div>
+      </section>
 
-  <section class="screen" *ngIf="phase === 'report'">
-    <div class="panel glow">
-      <h2>📝 Carta a la NASA</h2>
-      <p>Cuenta lo que aprendiste hoy. Elige hasta 3 aprendizajes:</p>
-      <div class="learn-list">
-        <button class="learn-item" *ngFor="let l of learnings" (click)="toggleLearning(l)" [class.sel]="selectedLearnings.includes(l)">⭐ {{l}}</button>
-        <p *ngIf="!learnings.length">Hoy no guardaste aprendizajes, ¡pero mañana habrá más!</p>
-      </div>
-      <textarea [(ngModel)]="reportText" placeholder="Escribe aquí tu nota del día (opcional)..."></textarea>
-      <button class="cta" (click)="submitReport()">{{day >= 7 ? 'Ver el final' : 'Enviar y dormir'}}</button>
+      <section class="screen" *ngIf="phase === 'ending'">
+        <div class="panel end" [class.win]="success">
+          <div class="trophy">{{success ? '🏆' : '🚀'}}</div>
+          <h2 class="big">{{success ? 'Mission accomplished!' : 'Good try!'}}</h2>
+          <p class="endtext">{{success ? 'You ejected the ship and the looters had to turn back to Earth. The gems of HAT-P-7b are safe!' : 'Some resources stayed at 25% or more, so you could not eject the ship. Try again!'}}</p>
+          <div class="end-res">
+            <div class="card" *ngFor="let r of resList" [class.ok]="resources[r.k] < 25"><span class="ic">{{r.icon}}</span><b>{{resources[r.k]}}%</b><small>{{r.label}}</small><em>{{resources[r.k] < 25 ? '✓ Under 25%' : '✗ Over 25%'}}</em></div>
+          </div>
+          <details class="diary"><summary>📖 Your learning diary</summary><ul class="log"><li *ngFor="let l of log">{{l}}</li></ul></details>
+          <button class="btn cta" (click)="restart()">Play again</button>
+        </div>
+      </section>
     </div>
-  </section>
-
-  <section class="screen ending" *ngIf="phase === 'ending'">
-    <div class="panel glow">
-      <h2>{{success ? '🎉 ¡MISIÓN CUMPLIDA!' : '💫 ¡BUEN INTENTO!'}}</h2>
-      <div *ngIf="success" class="success">
-        <p>¡Lo lograste! Bajaste Energía, Soporte vital y Escudo por debajo de 25%. La nave de los ladrones no puede seguir y las gemas de corindón de HAT-P-7b se quedan a salvo.</p>
-      </div>
-      <div *ngIf="!success" class="fail">
-        <p>No todos los recursos bajaron de 25% esta vez. Los ladrones aún pueden seguir, pero aprendiste muchísimo sobre energía, aire, agua y escudos espaciales.</p>
-        <p>Consejo: intenta bajar los tres recursos antes del día 7. ¡Puedes intentarlo otra vez!</p>
-      </div>
-      <div class="final-res">
-        <div class="pill">⚡ Energía: {{resources.energia}}%</div>
-        <div class="pill">🫁 Soporte: {{resources.soporte}}%</div>
-        <div class="pill">🛡️ Escudo: {{resources.blindaje}}%</div>
-      </div>
-      <h3>Tu diario de aprendizajes</h3>
-      <ul class="log"><li *ngFor="let l of log">{{l}}</li></ul>
-      <div class="nasa-fact">Datos y temas NASA: ECLSS (aire/agua), clima espacial y radiación (DONKI/OSDR), planeta HAT-P-7b con nubes de corindón (Al₂O₃).<br>Recursos: api.nasa.gov · ccmc.gsfc.nasa.gov/tools/DONKI/ · osdr.nasa.gov</div>
-      <button class="cta" (click)="restart()">Jugar otra vez</button>
-    </div>
-  </section>
+  </main>
 </div>
