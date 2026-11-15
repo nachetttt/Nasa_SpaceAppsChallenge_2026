@@ -13,12 +13,7 @@ Eres un astronauta en una misión secreta. Unos ladrones espaciales van al plane
   - 🛡️ **Escudo** (protección contra rayos/radiación espacial)
 - **Días 1, 3, 5, 7:** 3 decisiones con consecuencias y aprendizajes.
 - **Días 2, 4, 6:** minijuegos interactivos.
-- **Cada día:** informe de NOVA (robot amiga) y una carta a la NASA con lo aprendido.
-
-## Minijuegos interactivos
-- **Día 2 – Cables Brillantes:** memoriza y repite la secuencia de colores.
-- **Día 4 – Atrapa los Rayos:** haz clic en rayos espaciales que aparecen y desaparecen (tiempo limitado).
-- **Día 6 – Misión Sigilosa:** mueve al astronauta en una cuadrícula con botones hasta la computadora del ECLSS evitando robots guardianes.
+- **Cada día:** informe de Cygnus (IA) y una carta a la NASA con lo aprendido.
 
 ## Ciencia y datos de NASA (base educativa)
 El juego se inspira en recursos y conjuntos de datos reales de la NASA (sin inventar cifras técnicas):
