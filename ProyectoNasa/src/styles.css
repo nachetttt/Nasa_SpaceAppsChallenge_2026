@@ -1,0 +1,25 @@
+:root {
+  --orange: #ff8a1f;
+  --amber: #ffc247;
+  --blue: #2f7bff;
+  --sky: #6cc8ff;
+  --cream: #fff6e0;
+  --hot: #ff5a1f;
+  --text: #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #071433;
+  color: var(--text);
+  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+h1, h2, h3, p { margin: 0; }
+
+button { font-family: inherit; }
+button:disabled { cursor: default; }
